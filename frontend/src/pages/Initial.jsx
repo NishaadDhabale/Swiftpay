@@ -241,7 +241,7 @@ export const Initial=()=> {
               How It Works
             </h2>
             <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-              Get started with PhonePay in three simple steps and experience the future of digital payments.
+              Get started with SwiftPay in three simple steps and experience the future of digital payments.
             </p>
           </div>
 
@@ -287,7 +287,7 @@ export const Initial=()=> {
               </div>
               <h3 className="text-2xl font-bold text-gray-900">Start Paying</h3>
               <p className="text-gray-600 leading-relaxed">
-                Send money, pay bills, shop online, and earn rewards with every transaction you make.
+                Send money, pay bills, shop online.
               </p>
             </div>
           </div>
@@ -370,7 +370,7 @@ export const Initial=()=> {
               Ready to Transform Your Payments?
             </h2>
             <p className="text-xl text-blue-100 leading-relaxed">
-              Join millions of users who trust PhonePay for their daily transactions. Download now and get ₹100 bonus on your first payment.
+              Join millions of users who trust SwiftPay for their daily transactions.
             </p>
            {/* <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <button className="bg-white text-blue-600 px-8 py-4 rounded-xl hover:bg-gray-100 transition-all duration-300 transform hover:scale-105 flex items-center justify-center space-x-2 text-lg font-semibold">

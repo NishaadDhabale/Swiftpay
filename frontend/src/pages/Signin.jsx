@@ -12,16 +12,18 @@ export const Signin = () => {
  const navigate = useNavigate();
  const[username,setUserName]=useState("");
      const[password,setPassword]=useState("");
-    return <div className="bg-slate-300 h-screen flex justify-center">
+    return(
+      <div>
+    <div className="bg-slate-300 h-screen flex justify-center">
     <div className="flex flex-col justify-center">
       <div className="rounded-lg bg-white w-80 text-center p-2 h-max px-4">
-        <Heading label={"Sign in"} />
+       <Heading label={"Sign in"} />
         <SubHeading label={"Enter your credentials to access your account"} />
-        <InputBox 
+        <InputBox
        onChange={e=>{
           setUserName(e.target.value);
         }}placeholder="harkirat@gmail.com" label={"Email"} />
-        <InputBox 
+        <InputBox
         onChange={e=>{
           setPassword(e.target.value);
         }}
@@ -36,9 +38,16 @@ export const Signin = () => {
             navigate("/dashboard")
           }}label={"Sign in"} />
         </div>
-        <BottomWarning 
+        <BottomWarning
           label={"Don't have an account?"} buttonText={"Sign up"} to={"/signup"} />
-      </div>
+
+            <span className="justify-center">
+      <button onClick={()=>{navigate("/")}} className="bg-red-400 text-gray-50 px-10 rounded">Back</button>
+    </span>
+
     </div>
+      </div>
+
   </div>
-}
+  </div>
+   ) }
