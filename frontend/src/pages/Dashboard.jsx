@@ -14,11 +14,13 @@ useEffect(()=>{
         setBalance(response.data.balance)
     })
     },[])
-    return (  
-        <div>
+    const [click,setClick]=useState(false);
+
+    return (
+        <div >
        < Appbar name={"nishaad"} />
-       <Balance balance={balance}/>
-       <Users />
+       <Balance balance={balance} setClick={setClick}/>
+       <Users click={click} setClick={setClick} />
    </div>
 )
 }

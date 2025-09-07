@@ -34,9 +34,19 @@ export const Signin = () => {
               username:username,
               password:password
             });
-            localStorage.setItem("token",response.data.token)
-            navigate("/dashboard")
-          }}label={"Sign in"} />
+            console.log("request sent",response)
+            const token=response.data.token
+            if(token!=undefined){
+
+            localStorage.setItem("token",token)
+            navigate("/dashboard")}
+
+
+        else{ alert("Invalid Credentials")}
+
+           } }
+           label={"Sign in"} />
+
         </div>
         <BottomWarning
           label={"Don't have an account?"} buttonText={"Sign up"} to={"/signup"} />

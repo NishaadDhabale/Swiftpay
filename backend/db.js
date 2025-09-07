@@ -1,10 +1,10 @@
 
 const mongoose = require('mongoose');
+const dotenv = require('dotenv')
+dotenv.config();
 
-// Replace with your MongoDB Atlas connection string
-const dbURI = 'mongodb+srv://nishaaddhabale:AA@cluster0.lazqubi.mongodb.net/';
 
-mongoose.connect(dbURI)
+mongoose.connect(process.env.MONGO_URI)
 
 const userSchema = mongoose.Schema({
     username: {
@@ -33,7 +33,7 @@ const userSchema = mongoose.Schema({
         trim: true,
         maxLength: 50
     }
-}); 
+});
 const AccountsSchema = new mongoose.Schema({
     userid:{type: mongoose.Schema.Types.ObjectId,ref:"User",
     required:true
@@ -41,7 +41,7 @@ const AccountsSchema = new mongoose.Schema({
     balance:{
     type:Number,
     required:true }
-}); 
+});
 
 const User = mongoose.model("User",userSchema);
 const Account = mongoose.model("Accounts",AccountsSchema);

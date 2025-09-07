@@ -10,7 +10,11 @@ export const SendMoney = () => {
     const id = searchParams.get("id");
     const name = searchParams.get("name");
     const [amount, setAmount]= useState(0);
+    const [paidgateway,setPaidgateway]=useState(false);
+
     return <div class="flex justify-center h-screen bg-gray-100">
+
+        {!paidgateway &&(
         <div className="h-full flex flex-col justify-center">
             <div
                 class="border h-min text-card-foreground max-w-md p-4 space-y-8 w-96 bg-white shadow-lg rounded-lg"
@@ -43,9 +47,11 @@ export const SendMoney = () => {
                         placeholder="Enter amount"
                     />
                     </div>
-                    
-                    <button onClick={()=>{
-                        axios.post("http://localhost:3000/api/v1/account/transfer",{
+
+                    <button onClick={async()=>{
+                      if(amount>0) {
+                        try{
+                       await axios.post("http://localhost:3000/api/v1/account/transfer",{
                             to: id,
                             amount:amount
                         },
@@ -54,7 +60,14 @@ export const SendMoney = () => {
                             Authorization:"Bearer " + localStorage.getItem("token")
                         }
                     })
-                    }}className="justify-center rounded-md text-sm font-medium ring-offset-background transition-colors h-10 px-4 py-2 w-full bg-green-500 text-white">
+                    .then(setPaidgateway(true))
+                }catch(err){
+                    alert("Transaction failed, Money is not deducted from your account please try again")
+                }
+        }
+        else{ alert("enter a valid amount")}
+
+                     }}className="justify-center rounded-md text-sm font-medium ring-offset-background transition-colors h-10 px-4 py-2 w-full bg-green-500 text-white">
                         Initiate Transfer
                     </button>
                      <Button onClick={(e)=>{
@@ -63,6 +76,40 @@ export const SendMoney = () => {
                 </div>
                 </div>
         </div>
+      </div>)}
+
+
+      {paidgateway && (
+    <div className="h-full flex flex-col justify-center">
+            <div
+                class="border h-min text-card-foreground max-w-md p-4 space-y-8 w-96 bg-white shadow-lg rounded-lg"
+            >
+                <div class="flex flex-col space-y-1.5 p-6">
+                <h2 class="text-3xl font-bold text-center"> {amount}Rs Transfered Successfully</h2>
+                </div>
+                <div class="p-6">
+                <div class="flex items-center space-x-4">
+                    <div class="w-12 h-12 rounded-full bg-green-500 flex items-center justify-center">
+                    <span class="text-2xl text-white">{name[0].toUpperCase()}</span>
+                    </div>
+                    <h3 class="text-2xl font-semibold">{name}</h3>
+                </div>
+                <div class="space-y-4">
+                    <div class="space-y-2">
+
+
+                    </div>
+
+                    <button className="justify-center cursor-default rounded-md text-sm font-medium ring-offset-background transition-colors h-10 px-4 py-2 w-full bg-green-500 text-white">
+                        Transaction Completed
+                    </button>
+                     <Button onClick={(e)=>{
+                navigate("/dashboard");
+            }} label={"go back"} />
+                </div>
+                </div>
+        </div>
       </div>
+      ) }
     </div>
 }

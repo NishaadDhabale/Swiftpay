@@ -3,7 +3,7 @@ import { Button } from "./Button"
 import axios from "axios"
 import {useNavigate} from "react-router-dom";
 
-export const Users = () => {
+export const Users = ({click,setClick}) => {
     // Replace with backend call
     const [users, setUsers] = useState([]);
     const [filter,setFilter]= useState();
@@ -14,17 +14,29 @@ export const Users = () => {
     })
     },[filter])
     return <>
-        <div className="font-bold mt-6 text-lg">
-            Users
+        <div className="font-bold mt-6 p-4 mx-2 text-lg flex justify-between " onClick={()=>{
+            setClick(false)
+        }}>
+        <span>Users</span>
+        {click &&(
+            <span>
+             <Button onClick={()=>{setClick(false)}} label={"Close List"} tag={"secondary"}></Button>
+             </span>
+
+     )}
         </div>
-        <div className="my-2">
-            <input onChange={(e)=>{
+        <div className="my-2 mx-6">
+            <input onClick={()=>{
+                setClick(true);
+                setFilter("");
+            }}onChange={(e)=>{
+                setClick(true);
                 setFilter(e.target.value);
             }} type="text" placeholder="Search users..." className="w-full px-2 py-1 border rounded border-slate-200"></input>
         </div>
-        <div>
+      {click &&  (<div>
             {users.map(user => <User user={user} />)}
-        </div>
+        </div>)}
     </>
 }
 

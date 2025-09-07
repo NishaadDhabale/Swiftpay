@@ -7,6 +7,7 @@ import { useState } from "react"
 import axios from "axios";
 import { useNavigate } from "react-router-dom"
 
+
 export const Signup = () => {
 
     const[FirstName,setFirstName]=useState("");
@@ -35,18 +36,35 @@ export const Signup = () => {
         }} placeholder="123456" label={"Password"} />
         <div className="pt-4">
           <Button
-          onClick={async()=>{
+          onClick={
+
+            async()=>{
+              try{
             const response= await axios.post("http://localhost:3000/api/v1/user/signup",{
               username:userName,
               firstName:FirstName,
               lastName:LastName,
               password:password
             });
-            localStorage.setItem("token",response.data.token)
+
+            const token=response.data.token
+            if (token!=undefined){
+            localStorage.setItem("token",token)
             navigate("/dashboard")
-          }}
+
+            }}
+
+          catch(err){
+            alert("User Already Exists try an different email or sign in")
+          }}}
+
+
           label={"Sign up"} />
         </div>
+
+
+
+
         <BottomWarning label={"Already have an account?"} buttonText={"Sign in"} to={"/signin"} />
 
                     <span className="justify-center">
