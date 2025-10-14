@@ -23,8 +23,9 @@ export const Signin = () => {
         <InputBox
        onChange={e=>{
           setUserName(e.target.value);
-        }}placeholder="harkirat@gmail.com" label={"Email"} />
+        }}placeholder="harkirat@gmail.com" type="text" label={"Email"} />
         <InputBox
+        type="password"
         onChange={e=>{
           setPassword(e.target.value);
         }}
