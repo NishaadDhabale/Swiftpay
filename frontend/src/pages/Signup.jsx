@@ -40,7 +40,7 @@ export const Signup = () => {
 
             async()=>{
               try{
-            const response= await axios.post("http://localhost:3000/api/v1/user/signup",{
+            const response= await axios.post("https://swiftpay-zu8b.onrender.com/api/v1/user/signup",{
               username:userName,
               firstName:FirstName,
               lastName:LastName,

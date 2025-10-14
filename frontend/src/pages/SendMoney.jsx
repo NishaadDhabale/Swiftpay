@@ -51,7 +51,7 @@ export const SendMoney = () => {
                     <button onClick={async()=>{
                       if(amount>0) {
                         try{
-                       await axios.post("http://localhost:3000/api/v1/account/transfer",{
+                       await axios.post("https://swiftpay-zu8b.onrender.com/api/v1/account/transfer",{
                             to: id,
                             amount:amount
                         },

@@ -7,7 +7,7 @@ import axios from "axios"
 export const Dashboard = () => {
 const [balance,setBalance]=useState(0);
 useEffect(()=>{
-     axios.get("http://localhost:3000/api/v1/account/balance",{headers:{
+     axios.get("https://swiftpay-zu8b.onrender.com/api/v1/account/balance",{headers:{
          Authorization:"Bearer " + localStorage.getItem("token")
     }})
     .then(response=>{
