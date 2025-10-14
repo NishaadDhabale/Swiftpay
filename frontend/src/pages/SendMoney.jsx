@@ -3,6 +3,7 @@ import axios from "axios"
 import {useState} from "react"
 import {useNavigate} from "react-router-dom";
 import { Button } from "../components/Button"
+import { BACKEND_URL } from '../config';
 
 export const SendMoney = () => {
     const navigate = useNavigate();
@@ -51,7 +52,7 @@ export const SendMoney = () => {
                     <button onClick={async()=>{
                       if(amount>0) {
                         try{
-                       await axios.post("https://swiftpay-zu8b.onrender.com/api/v1/account/transfer",{
+                       await axios.post(`${BACKEND_URL}/api/v1/account/transfer`,{
                             to: id,
                             amount:amount
                         },

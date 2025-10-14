@@ -2,13 +2,14 @@ import { useState, useEffect } from "react"
 import { Button } from "./Button"
 import axios from "axios"
 import {useNavigate} from "react-router-dom";
+import { BACKEND_URL } from "../config";
 
 export const Users = ({click,setClick}) => {
     // Replace with backend call
     const [users, setUsers] = useState([]);
     const [filter,setFilter]= useState();
     useEffect(()=>{
-     axios.get("https://swiftpay-zu8b.onrender.com/api/v1/user/bulk?filter="+filter)
+     axios.get(`${BACKEND_URL}/api/v1/user/bulk?filter=`+filter)
     .then(response=>{
         setUsers(response.data.user)
     })

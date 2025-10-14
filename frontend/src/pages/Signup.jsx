@@ -6,6 +6,7 @@ import { SubHeading } from "../components/SubHeading"
 import { useState } from "react"
 import axios from "axios";
 import { useNavigate } from "react-router-dom"
+import { BACKEND_URL } from "../config"
 
 
 export const Signup = () => {
@@ -40,7 +41,7 @@ export const Signup = () => {
 
             async()=>{
               try{
-            const response= await axios.post("https://swiftpay-zu8b.onrender.com/api/v1/user/signup",{
+            const response= await axios.post(`${BACKEND_URL}/api/v1/user/signup`,{
               username:userName,
               firstName:FirstName,
               lastName:LastName,

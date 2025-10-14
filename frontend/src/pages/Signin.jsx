@@ -6,6 +6,7 @@ import { SubHeading } from "../components/SubHeading"
 import axios from "axios"
 import { useNavigate } from "react-router-dom"
 import { useState } from "react"
+import { BACKEND_URL } from "../config"
 
 
 export const Signin = () => {
@@ -30,7 +31,7 @@ export const Signin = () => {
         placeholder="123456" label={"Password"} />
         <div className="pt-4">
           <Button onClick={async()=>{
-            const response= await axios.post("https://swiftpay-zu8b.onrender.com/api/v1/user/signin",{
+            const response= await axios.post(`${BACKEND_URL}/api/v1/user/signin`,{
               username:username,
               password:password
             });
