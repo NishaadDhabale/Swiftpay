@@ -6,6 +6,7 @@ import axios from "axios"
 import { BACKEND_URL } from "../config"
 
 export const Dashboard = () => {
+    const [loading,setLoading]=useState(false);
 const [balance,setBalance]=useState(0);
 useEffect(()=>{
      axios.get(`${BACKEND_URL}/api/v1/account/balance`,{headers:{
