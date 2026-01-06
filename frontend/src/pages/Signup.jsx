@@ -7,7 +7,7 @@ import { useState } from "react"
 import axios from "axios";
 import { useNavigate } from "react-router-dom"
 import { BACKEND_URL } from "../config"
-
+import { GoogleLogin } from "@react-oauth/google";
 
 export const Signup = () => {
 
@@ -39,6 +39,7 @@ export const Signup = () => {
           setPassword(e.target.value);
         }} placeholder="123456" label={"Password"} />
         <div className="pt-4">
+          
           <Button
           onClick={
 
@@ -64,6 +65,24 @@ export const Signup = () => {
 
 
           label={"Sign up"} />
+          <div className="rounded-2xl flex justify-center w-full">
+              <GoogleLogin className="w-full flex justify-center mt-4"
+      onSuccess={async (credentialResponse) => {
+        const idToken = credentialResponse.credential;
+
+        // Send token to backend
+        const res = await axios.post("http://localhost:5000/auth/google", {
+          token: idToken,
+        });
+
+        console.log("Backend response:", res.data);
+        localStorage.setItem("token", res.data.token); // your app JWT
+      }}
+      onError={() => {
+        console.log("Login Failed");
+      }}
+    />
+    </div>
         </div>
 
 
@@ -77,6 +96,9 @@ export const Signup = () => {
 
 
       </div>
+      
+
     </div>
+
   </div>
 }
