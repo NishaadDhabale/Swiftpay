@@ -3,11 +3,12 @@ const router = express.Router();
 const zod = require("zod");
 const{ User,Account } = require("../db.js");
 const jwt = require("jsonwebtoken");
-const {JWT_SECRET} = require("../config");
 
 const {authMiddleware} = require("../middleware.js");
+const { JWT_SECRET, GOOGLE_CLIENT_ID } = require("../config");
+const { OAuth2Client } = require('google-auth-library');
 
-
+const client = new OAuth2Client(GOOGLE_CLIENT_ID);
 
 const signupSchema = zod.object({
     username:zod.string().email(),
@@ -62,7 +63,51 @@ res.json({
 })
 })
 
+router.post("/auth/google", async (req, res) => {
+    const { token } = req.body; // Matches frontend { token: idToken }
 
+    try {
+        // 1. Verify the ID Token from Google
+        const ticket = await client.verifyIdToken({
+            idToken: token,
+            audience: GOOGLE_CLIENT_ID,
+        });
+        const payload = ticket.getPayload();
+        const { email, given_name, family_name } = payload;
+
+        // 2. Find or create the user in your database
+        let user = await User.findOne({ username: email });
+
+        if (!user) {
+            // Create user if they don't exist
+            user = await User.create({
+                username: email,
+                firstName: given_name || "First",
+                lastName: family_name || "Last",
+                // password is not provided for OAuth users
+            });
+
+            // Initialize account balance for new users (consistent with your signup logic)
+            await Account.create({
+                userid: user._id,
+                balance: 1 + 1000 * Math.random()
+            });
+        }
+
+        // 3. Issue your application's JWT
+        const appToken = jwt.sign({
+            userid: user._id
+        }, JWT_SECRET);
+
+        res.json({
+            token: appToken
+        });
+
+    } catch (error) {
+        console.error("Google login error:", error);
+        res.status(401).json({ message: "Invalid Google token" });
+    }
+});
 
 
 const signinBody = zod.object({

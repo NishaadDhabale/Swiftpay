@@ -56,12 +56,13 @@ export const Signin = () => {
         const idToken = credentialResponse.credential;
 
         // Send token to backend
-        const res = await axios.post("http://localhost:3000/api/v1/user/auth/google", {
+        const res = await axios.post(`${BACKEND_URL}/api/v1/user/auth/google`, {
           token: idToken,
         });
 
-        console.log("Backend response:", res.data);
+        
         localStorage.setItem("token", res.data.token); // your app JWT
+        navigate("/dashboard");
       }}
       onError={() => {
         console.log("Login Failed");
