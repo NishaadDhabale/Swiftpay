@@ -8,6 +8,7 @@ import { Signin } from "./pages/Signin";
 import { Dashboard } from "./pages/Dashboard";
 import { SendMoney } from "./pages/SendMoney.jsx";
 import { Initial } from "./pages/Initial.jsx";
+import LandingPage from "./pages/Landing.jsx";
 
 function App() {
 
@@ -16,7 +17,8 @@ function App() {
    <BrowserRouter>
    
    <Routes>
-        <Route path="/" element={<Initial/>}/>
+    <Route path="/" element={<LandingPage/>}/>
+        <Route path="/landing2" element={<Initial/>}/>
         <Route path="/signup" element={<Signup/>}/>
         <Route path="/signin" element={<Signin/>}/>
         <Route path="/dashboard" element={<Dashboard/>}/>
