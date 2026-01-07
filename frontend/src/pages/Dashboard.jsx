@@ -9,10 +9,12 @@ export const Dashboard = () => {
     const [loading,setLoading]=useState(false);
 const [balance,setBalance]=useState(0);
 useEffect(()=>{
+    setLoading(true);
      axios.get(`${BACKEND_URL}/api/v1/account/balance`,{headers:{
          Authorization:"Bearer " + localStorage.getItem("token")
     }})
     .then(response=>{
+        setLoading(false);
         setBalance(response.data.balance)
     })
     },[])
@@ -21,7 +23,7 @@ useEffect(()=>{
     return (
         <div >
        < Appbar name={"nishaad"} />
-       <Balance balance={balance} setClick={setClick}/>
+       <Balance balance={balance} loading={loading} setClick={setClick}/>
        <Users click={click} setClick={setClick} />
    </div>
 )
