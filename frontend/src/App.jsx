@@ -11,6 +11,7 @@ import { SendMoney } from "./pages/SendMoney.jsx";
 import { Initial } from "./pages/Initial.jsx";
 import LandingPage from "./pages/Landing.jsx";
 import { ProtectedRoute } from "./components/ProtectedRoute.jsx";
+import {UpdateDetails} from "./pages/UpdateDetails.jsx";
 
 function App() {
 
@@ -24,7 +25,10 @@ function App() {
         <Route path="/landing2" element={<Initial/>}/>
         <Route path="/signup" element={<Signup  />}/>
         <Route path="/signin" element={<Signin />}/>
-
+        <Route
+    path="/update"
+    element={<ProtectedRoute><UpdateDetails /></ProtectedRoute>}
+/>
         <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>}/>
         <Route path="/send" element={<ProtectedRoute><SendMoney/></ProtectedRoute>}/>
    </Routes>

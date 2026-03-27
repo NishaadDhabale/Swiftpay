@@ -163,7 +163,7 @@ router.get('/me', authMiddleware, async (req, res) => {
 });
 
 router.put('/', authMiddleware, async (req, res) => {
-  const { success } = signinBody.safeParse(req.body);
+  const { success } = update.safeParse(req.body);
   if (!success) {
     return res.status(411).json({
       message: 'Email already taken/ incorrect inputs',
