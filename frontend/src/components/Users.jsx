@@ -9,10 +9,16 @@ export const Users = ({click,setClick}) => {
     const [users, setUsers] = useState([]);
     const [filter,setFilter]= useState();
     useEffect(()=>{
-     axios.get(`${BACKEND_URL}/api/v1/user/bulk?filter=`+filter)
+     axios.get(`${BACKEND_URL}/api/v1/user/bulk?filter=`+filter, {
+          headers: {
+            Authorization: 'Bearer ' + localStorage.getItem('token'),
+          }})
     .then(response=>{
         setUsers(response.data.user)
     })
+    .catch(error=>{
+        console.log(error)
+    });
     },[filter])
     return <>
         <div className="font-bold mt-6 p-4 mx-2 text-lg flex justify-between " onClick={()=>{

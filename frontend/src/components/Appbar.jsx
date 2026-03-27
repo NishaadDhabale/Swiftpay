@@ -1,34 +1,31 @@
-import { Link } from "react-router-dom"
-import {useNavigate} from "react-router-dom";
 
+import { useNavigate } from 'react-router-dom';
 
-export const Appbar = () => {
-    const navigate = useNavigate();
-    return <div className="m-8 shadow h-14 flex justify-between items-center px-4">
+export const Appbar = ({ user }) => {
+  const navigate = useNavigate();
+  return (
+    <div className="m-8 shadow h-14 flex justify-between items-center px-4">
+      <div className="flex flex-col justify-center h-full ml-4">
+        SwiftPay App
+      </div>
 
-        <div className="flex flex-col justify-center h-full ml-4">
-            SwiftPay App
+      <div className="flex h-full ml-4x">
+        <button
+          onClick={() => {
+            localStorage.removeItem('token');
+            navigate('/signup');
+          }}
+          className="mt-2 rounded-md bg-red-300 text-white text-sm px-6 h-10 flex items-center justify-center mr-4 hover:bg-red-600 transition"
+        >
+          Logout
+        </button>
+
+        <div className="rounded-full h-12 w-12 bg-slate-200 flex justify-center mt-1 mr-2">
+          <div className="flex flex-col justify-center h-full text-xl">
+            {user?.firstName ? user.firstName[0].toUpperCase() : 'U'}
+          </div>
         </div>
-
-        <div className="flex h-full ml-4x">
-
-
-            <button onClick= {()=>{
-                localStorage.removeItem("token");
-                        navigate("/signup");
-
-                }}
-                className="mt-2 rounded-md bg-red-300 text-white text-sm px-6 h-10 flex items-center justify-center mr-4 hover:bg-red-600 transition"
-
-            >
-                Logout
-            </button>
-
-            <div className="rounded-full h-12 w-12 bg-slate-200 flex justify-center mt-1 mr-2">
-                <div className="flex flex-col justify-center h-full text-xl">
-                    U
-                </div>
-            </div>
-        </div>
+      </div>
     </div>
-}
+  );
+};
