@@ -1,4 +1,4 @@
-const { User, Account } = require('../db.js');
+const { User, Account, Transaction } = require('../db.js');
 const zod = require('zod');
 const { authMiddleware } = require('../middleware.js');
 const express = require('express');
@@ -20,7 +20,7 @@ router.post('/transfer', authMiddleware, async (req, res) => {
   session.startTransaction();
   const { amount, to } = req.body;
 
-  // Fetch the accounts within the transaction
+
   const accounts = await Account.findOne({ userid: req.userid }).session(
     session
   );
@@ -41,7 +41,6 @@ router.post('/transfer', authMiddleware, async (req, res) => {
     });
   }
 
-  // Perform the transfer
   await Account.updateOne(
     { userid: req.userid },
     { $inc: { balance: -amount } }
@@ -51,7 +50,14 @@ router.post('/transfer', authMiddleware, async (req, res) => {
     { $inc: { balance: amount } }
   ).session(session);
 
-  // Commit the transaction
+  await Transaction.create([{
+    sender: req.userid,
+    receiver: to,
+    amount: amount,
+    status: 'completed'
+  }], { session });
+
+
   await session.commitTransaction();
   res.json({
     message: 'Transfer successful',
@@ -59,3 +65,66 @@ router.post('/transfer', authMiddleware, async (req, res) => {
 });
 
 module.exports = router;
+
+router.get('/transactions', authMiddleware, async (req, res) => {
+  const page = parseInt(req.query.page) || 1;
+  const limit = parseInt(req.query.limit) || 20;
+  const skip = (page - 1) * limit;
+
+  const query = {
+    $or: [{ sender: req.userid }, { receiver: req.userid }],
+  };
+
+  const total = await Transaction.countDocuments(query);
+  const transactions = await Transaction.find(query)
+    .sort({ createdAt: -1 })
+    .skip(skip)
+    .limit(limit)
+    .populate('sender', 'firstName lastName username')
+    .populate('receiver', 'firstName lastName username');
+
+  res.json({
+    transactions,
+    page,
+    limit,
+    total,
+    totalPages: Math.ceil(total / limit),
+  });
+});
+
+
+router.get('/analytics', authMiddleware, async (req, res) => {
+
+  const query = {
+    $or: [{ sender: req.userid }, { receiver: req.userid }],
+  };
+
+  const transactions = await Transaction.find(query);
+
+  let totalSent = 0;
+  let totalReceived = 0;
+  const dailyMap = {};
+
+  transactions.forEach((tx) => {
+    const dateStr = tx.createdAt.toISOString().split('T')[0];
+    if (!dailyMap[dateStr]) {
+      dailyMap[dateStr] = { date: dateStr, sent: 0, received: 0 };
+    }
+
+    if (tx.sender.toString() === req.userid.toString()) {
+      totalSent += tx.amount;
+      dailyMap[dateStr].sent += tx.amount;
+    } else {
+      totalReceived += tx.amount;
+      dailyMap[dateStr].received += tx.amount;
+    }
+  });
+
+  res.json({
+    totalSent,
+    totalReceived,
+    netFlow: totalReceived - totalSent,
+    transactionCount: transactions.length,
+    daily: Object.values(dailyMap).sort((a, b) => new Date(a.date) - new Date(b.date)),
+  });
+});

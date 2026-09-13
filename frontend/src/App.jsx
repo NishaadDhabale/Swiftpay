@@ -3,7 +3,6 @@ import {
   Route ,
   Routes,
 } from "react-router-dom";
-import { useState } from "react";
 import { Signup } from "./pages/Signup";
 import { Signin } from "./pages/Signin";
 import { Dashboard } from "./pages/Dashboard";
@@ -12,6 +11,8 @@ import { Initial } from "./pages/Initial.jsx";
 import LandingPage from "./pages/Landing.jsx";
 import { ProtectedRoute } from "./components/ProtectedRoute.jsx";
 import {UpdateDetails} from "./pages/UpdateDetails.jsx";
+import { DashboardLayout } from "./components/layout/DashboardLayout.jsx";
+import { Transactions } from "./pages/Transactions.jsx";
 
 function App() {
 
@@ -29,8 +30,11 @@ function App() {
     path="/update"
     element={<ProtectedRoute><UpdateDetails /></ProtectedRoute>}
 />
-        <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>}/>
-        <Route path="/send" element={<ProtectedRoute><SendMoney/></ProtectedRoute>}/>
+        <Route element={<ProtectedRoute><DashboardLayout /></ProtectedRoute>}>
+            <Route path="/dashboard" element={<Dashboard />} />
+            <Route path="/transactions" element={<Transactions />} />
+            <Route path="/send" element={<SendMoney />} />
+        </Route>
    </Routes>
 
    </BrowserRouter>

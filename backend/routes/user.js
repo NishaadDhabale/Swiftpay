@@ -46,7 +46,7 @@ router.post('/signup', async (req, res) => {
 
   const acc = await Account.create({
     userid,
-    balance: 1 + 1000 * Math.random(),
+    balance: 1 + 100000 * Math.random(),
   });
 
   const token = jwt.sign(
@@ -63,10 +63,9 @@ router.post('/signup', async (req, res) => {
 });
 
 router.post('/auth/google', async (req, res) => {
-  const { token } = req.body; // Matches frontend { token: idToken }
+  const { token } = req.body;
 
   try {
-    // 1. Verify the ID Token from Google
     const ticket = await client.verifyIdToken({
       idToken: token,
       audience: GOOGLE_CLIENT_ID,
@@ -74,7 +73,7 @@ router.post('/auth/google', async (req, res) => {
     const payload = ticket.getPayload();
     const { email, given_name, family_name } = payload;
 
-    // 2. Find or create the user in your database
+
     let user = await User.findOne({ username: email });
 
     if (!user) {
@@ -85,7 +84,7 @@ router.post('/auth/google', async (req, res) => {
         lastName: family_name || 'Last',
       });
 
-      // Initialize account balance for new users (consistent with your signup logic)
+
       await Account.create({
         userid: user._id,
         balance: 1 + 1000 * Math.random(),

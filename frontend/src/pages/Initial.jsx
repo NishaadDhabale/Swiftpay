@@ -7,10 +7,7 @@ import {
   Shield,
   Zap,
   Gift,
-  Users,
-  CreditCard,
-  Download,
-  Play,
+
   CheckCircle,
   Star,
   Phone,

@@ -43,10 +43,34 @@ const AccountsSchema = new mongoose.Schema({
     required:true }
 });
 
+const TransactionSchema = new mongoose.Schema({
+    sender: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "User",
+        required: true
+    },
+    receiver: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "User",
+        required: true
+    },
+    amount: {
+        type: Number,
+        required: true
+    },
+    status: {
+        type: String,
+        enum: ['completed', 'failed', 'pending'],
+        default: 'pending'
+    }
+}, { timestamps: true });
+
+const Transaction = mongoose.model("Transaction", TransactionSchema);
 const User = mongoose.model("User",userSchema);
 const Account = mongoose.model("Accounts",AccountsSchema);
 
 module.exports ={
     User,
-    Account
+    Account,
+    Transaction
 };

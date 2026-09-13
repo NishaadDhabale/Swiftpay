@@ -1,44 +1,19 @@
-import { BottomWarning } from '../components/BottomWarning';
-import { Button } from '../components/Button';
-import { Heading } from '../components/Heading';
-import { InputBox } from '../components/InputBox';
-import { SubHeading } from '../components/SubHeading';
 import axios from 'axios';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { useState } from 'react';
 import { BACKEND_URL } from '../config';
 import { GoogleLogin } from '@react-oauth/google';
+import { motion, AnimatePresence } from 'framer-motion';
+import { Eye, EyeOff, ArrowRight, ChartColumnIncreasing } from 'lucide-react';
 
-const ErrorAlert = ({ message }) => {
-  if (!message) return null;
-
-  return (
-    <div
-      className="flex items-center justify-center p-4 mb-4 text-red-800 border-t-4 border-red-300 bg-red-50 rounded-lg animate-pulse"
-      role="alert"
-    >
-      <svg
-        className="flex-shrink-0 w-5 h-5"
-        fill="currentColor"
-        viewBox="0 0 20 20"
-      >
-        <path
-          fillRule="evenodd"
-          d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z"
-          clipRule="evenodd"
-        />
-      </svg>
-      <div className="ml-3 text-sm font-medium">{message}</div>
-    </div>
-  );
+const containerVariants = {
+  hidden: { opacity: 0 },
+  show: { opacity: 1, transition: { staggerChildren: 0.1 } },
 };
-const SkeletonLoader = () => (
-  <div className="h-screen w-full flex justify-center items-center flex-col gap-4  animate-pulse">
-    <div className="h-4 bg-gray-200 rounded w-3/4"></div>
-    <div className="h-4 bg-gray-200 rounded w-full"></div>
-    <div className="h-4 bg-gray-200 rounded w-5/6"></div>
-  </div>
-);
+const itemVariants = {
+  hidden: { opacity: 0, y: 24 },
+  show: { opacity: 1, y: 0, transition: { type: 'spring', stiffness: 300, damping: 24 } },
+};
 
 export const Signin = () => {
   const navigate = useNavigate();
@@ -46,114 +21,206 @@ export const Signin = () => {
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  const [showPass, setShowPass] = useState(false);
 
-  if (loading) return <SkeletonLoader />;
+  const handleSignin = async () => {
+    if (!username || !password) { setError('Please fill in all fields'); return; }
+    setLoading(true); setError(null);
+    try {
+      const response = await axios.post(`${BACKEND_URL}/api/v1/user/signin`, { username, password });
+      const token = response.data.token;
+      if (token) { localStorage.setItem('token', token); navigate('/dashboard'); }
+      else { setError(response.data.message); }
+    } catch (e) {
+      setError(e.response?.data?.message || 'Something went wrong. Please try again.');
+    } finally { setLoading(false); }
+  };
 
   return (
-    <div>
-      {error && <ErrorAlert message={error} />}
-      <div className="bg-slate-300 h-screen flex justify-center">
-        <div className="flex flex-col justify-center">
-          <div className="rounded-lg bg-white w-80 text-center p-2 h-max px-4">
-            <Heading label={'Sign in'} />
-            <SubHeading
-              label={'Enter your credentials to access your account'}
-            />
-            <InputBox
-              onChange={(e) => {
-                setUserName(e.target.value);
-              }}
-              placeholder="harkirat@gmail.com"
-              type="text"
-              label={'Email'}
-            />
-            <InputBox
-              type="password"
-              onChange={(e) => {
-                setPassword(e.target.value);
-              }}
-              placeholder="123456"
-              label={'Password'}
-            />
-            <div className="pt-4">
-              <Button
-                onClick={async () => {
-                  setLoading(true);
-                  try {
-                    const response = await axios.post(
-                      `${BACKEND_URL}/api/v1/user/signin`,
-                      {
-                        username: username,
-                        password: password,
-                      },
-                    );
+    <div className="min-h-screen bg-[#141414] text-white flex overflow-hidden selection:bg-[#ff7d61]">
+      {/* ── Left Branding Panel ── */}
+      <motion.div
+        initial={{ x: -60, opacity: 0 }}
+        animate={{ x: 0, opacity: 1 }}
+        transition={{ duration: 0.8, ease: 'easeOut' }}
+        className="hidden lg:flex lg:w-[55%] flex-col justify-between p-16 relative overflow-hidden"
+      >
+        {/* Background decorative circles */}
+        <div className="absolute -top-24 -left-24 w-96 h-96 bg-[#ff7d61]/10 rounded-full blur-3xl pointer-events-none" />
+        <div className="absolute bottom-0 right-0 w-72 h-72 bg-[#ff7d61]/5 rounded-full blur-3xl pointer-events-none" />
 
-                    const token = response.data.token;
+        {/* Logo */}
+        <div className="flex items-center gap-3 z-10">
+          <div className="w-10 h-10 bg-[#FF5722] rounded-xl flex items-center justify-center shadow-lg shadow-orange-500/30">
+            <ChartColumnIncreasing size={20} className="text-white" />
+          </div>
+          <span className="text-xl font-bold">SwiftPay</span>
+        </div>
 
-                    setLoading(false);
-                    if (token != undefined) {
-                      localStorage.setItem('token', token);
-                      navigate('/dashboard');
-                    } else {
-                      setError(response.data.message);
-                    }
-                  } catch (error) {
-                    const errorMsg =
-                      error.response?.data?.message ||
-                      'Something went wrong. Please try again.';
-                    setError(errorMsg);
-                    setLoading(false);
-                  }
-                }}
-                label={'Sign in'}
-              />
-            </div>
-            <div className="rounded-2xl flex justify-center w-full">
-              <GoogleLogin
-                className="w-full flex justify-center mt-4"
-                onSuccess={async (credentialResponse) => {
-                  setLoading(true);
-                  const idToken = credentialResponse.credential;
+        {/* Hero text */}
+        <div className="z-10">
+          <motion.h1
+            initial={{ opacity: 0, y: 40 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.3, duration: 0.8, ease: 'easeOut' }}
+            className="text-[80px] leading-[0.9] font-serif tracking-tighter mb-8 text-white"
+          >
+            Swift
+            <br />
+            <span className="text-[#ff7d61]">Pay</span>
+          </motion.h1>
+          <motion.p
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.6 }}
+            className="text-gray-400 text-lg leading-relaxed max-w-sm"
+          >
+            Send money, pay bills, and manage your finances with the most secure and fastest payment platform.
+          </motion.p>
 
-                  // Send token to backend
-                  const res = await axios.post(
-                    `${BACKEND_URL}/api/v1/user/auth/google`,
-                    {
-                      token: idToken,
-                    },
-                  );
-                  setLoading(false);
+          {/* Stat badges */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.8 }}
+            className="flex gap-4 mt-10"
+          >
+            {[{ val: '4X', label: 'Faster Transfers' }, { val: '24/7', label: 'Availability' }, { val: '100%', label: 'Secure' }].map((s) => (
+              <div key={s.val} className="flex flex-col items-center justify-center w-24 h-24 rounded-full bg-white/5 border border-white/10 hover:bg-white/10 transition-colors">
+                <span className="text-2xl font-bold text-white">{s.val}</span>
+                <span className="text-[9px] text-gray-400 text-center leading-tight mt-0.5 px-2">{s.label}</span>
+              </div>
+            ))}
+          </motion.div>
+        </div>
 
-                  localStorage.setItem('token', res.data.token); // your app JWT
-
-                  navigate('/dashboard');
-                }}
-                onError={() => {
-                  {
-                    error && <ErrorAlert message={'Login Failed'} />;
-                  }
-                  console.log('Login Failed');
-                }}
-              />
-            </div>
-            <BottomWarning
-              label={"Don't have an account?"}
-              buttonText={'Sign up'}
-              to={'/signup'}
-            />
-
-            <span className="justify-center">
-              <button
-                onClick={() => {
-                  navigate('/');
-                }}
-                className="bg-red-400 text-gray-50 px-10 rounded"
-              >
-                Back
-              </button>
-            </span>
+        {/* Bottom author */}
+        <div className="flex items-center gap-3 z-10">
+          <div className="w-10 h-10 rounded-full bg-gradient-to-tr from-amber-400 to-orange-500 overflow-hidden flex-shrink-0">
+            <img src="https://i.redd.it/70kxbgclienf1.jpeg" className="w-full h-full object-cover scale-125" alt="Author" />
+          </div>
+          <div>
+            <p className="font-bold text-sm">Nishaad Dhabale</p>
+            <p className="text-xs text-gray-500 uppercase tracking-wider">Project Head</p>
           </div>
         </div>
+      </motion.div>
+
+      {/* ── Right Form Panel ── */}
+      <div className="flex-1 flex items-center justify-center p-6 lg:p-16">
+        <motion.div
+          variants={containerVariants}
+          initial="hidden"
+          animate="show"
+          className="w-full max-w-md"
+        >
+          {/* Mobile logo */}
+          <motion.div variants={itemVariants} className="flex items-center gap-2 mb-10 lg:hidden">
+            <div className="w-8 h-8 bg-[#FF5722] rounded-lg flex items-center justify-center">
+              <ChartColumnIncreasing size={16} className="text-white" />
+            </div>
+            <span className="text-lg font-bold">SwiftPay</span>
+          </motion.div>
+
+          <motion.div variants={itemVariants}>
+            <h2 className="text-3xl font-bold text-white mb-1">Welcome back</h2>
+            <p className="text-gray-500 mb-8">Sign in to your SwiftPay account</p>
+          </motion.div>
+
+          <AnimatePresence>
+            {error && (
+              <motion.div
+                initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }}
+                className="mb-6 p-4 rounded-2xl bg-rose-500/10 border border-rose-500/20 text-rose-400 text-sm font-medium"
+              >
+                {error}
+              </motion.div>
+            )}
+          </AnimatePresence>
+
+          <div className="space-y-4">
+            <motion.div variants={itemVariants}>
+              <label className="block text-sm font-medium text-gray-400 mb-2">Email</label>
+              <input
+                type="email"
+                placeholder="you@example.com"
+                value={username}
+                onChange={(e) => { setUserName(e.target.value); setError(null); }}
+                onKeyDown={(e) => e.key === 'Enter' && handleSignin()}
+                className="w-full px-5 py-4 bg-white/5 border border-white/10 rounded-2xl text-white placeholder-gray-600 outline-none focus:border-[#ff7d61]/60 focus:bg-white/8 focus:ring-2 focus:ring-[#ff7d61]/20 transition-all text-sm"
+              />
+            </motion.div>
+
+            <motion.div variants={itemVariants}>
+              <label className="block text-sm font-medium text-gray-400 mb-2">Password</label>
+              <div className="relative">
+                <input
+                  type={showPass ? 'text' : 'password'}
+                  placeholder="••••••••"
+                  value={password}
+                  onChange={(e) => { setPassword(e.target.value); setError(null); }}
+                  onKeyDown={(e) => e.key === 'Enter' && handleSignin()}
+                  className="w-full px-5 py-4 pr-12 bg-white/5 border border-white/10 rounded-2xl text-white placeholder-gray-600 outline-none focus:border-[#ff7d61]/60 focus:bg-white/8 focus:ring-2 focus:ring-[#ff7d61]/20 transition-all text-sm"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPass(!showPass)}
+                  className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-600 hover:text-gray-400 transition-colors"
+                >
+                  {showPass ? <EyeOff size={18} /> : <Eye size={18} />}
+                </button>
+              </div>
+            </motion.div>
+
+            <motion.div variants={itemVariants}>
+              <motion.button
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+                onClick={handleSignin}
+                disabled={loading}
+                className="w-full py-4 bg-[#ff7d61] hover:bg-[#e85f43] disabled:opacity-60 text-black font-bold rounded-2xl transition-all flex items-center justify-center gap-2 shadow-lg shadow-[#ff7d61]/20 text-sm"
+              >
+                {loading ? (
+                  <span className="w-4 h-4 border-2 border-black/30 border-t-black rounded-full animate-spin" />
+                ) : (
+                  <><span>Sign in</span><ArrowRight size={16} /></>
+                )}
+              </motion.button>
+            </motion.div>
+
+            <motion.div variants={itemVariants} className="relative flex items-center gap-4 py-2">
+              <div className="flex-1 h-px bg-white/10" />
+              <span className="text-gray-600 text-xs font-medium">or continue with</span>
+              <div className="flex-1 h-px bg-white/10" />
+            </motion.div>
+
+            <motion.div variants={itemVariants} className="flex justify-center">
+              <GoogleLogin
+                onSuccess={async (credentialResponse) => {
+                  setLoading(true);
+                  try {
+                    const res = await axios.post(`${BACKEND_URL}/api/v1/user/auth/google`, { token: credentialResponse.credential });
+                    localStorage.setItem('token', res.data.token);
+                    navigate('/dashboard');
+                  } catch { setError('Google sign-in failed.'); }
+                  finally { setLoading(false); }
+                }}
+                onError={() => setError('Google sign-in failed.')}
+              />
+            </motion.div>
+          </div>
+
+          <motion.p variants={itemVariants} className="text-center text-gray-500 text-sm mt-8">
+            Don't have an account?{' '}
+            <Link to="/signup" className="text-[#ff7d61] font-semibold hover:underline">Sign up</Link>
+          </motion.p>
+
+          <motion.div variants={itemVariants} className="text-center mt-4">
+            <button onClick={() => navigate('/')} className="text-gray-600 text-xs hover:text-gray-400 transition-colors">
+              ← Back to homepage
+            </button>
+          </motion.div>
+        </motion.div>
       </div>
     </div>
   );
