@@ -11,6 +11,19 @@ import {
 import axios from 'axios';
 import { BACKEND_URL } from '../../config';
 
+const TRANSACTION_CATEGORIES = [
+  'General',
+  'Personal Transfer',
+  'Business Payment',
+  'Family & Friends',
+  'Bills & Utilities',
+  'Shopping',
+  'Food',
+  'Transport',
+  'Entertainment',
+  'Health',
+  'Other',
+];
 const containerVariants = {
   hidden: { opacity: 0 },
   show: { opacity: 1, transition: { staggerChildren: 0.05 } },
@@ -33,6 +46,8 @@ const formatCurrency = (val) =>
   }).format(val);
 
 export const RecentActivities = ({ limit, isFullPage = false }) => {
+  const [categoryFilter, setCategoryFilter] = useState('All');
+  const [updatingCategory, setUpdatingCategory] = useState(null);
   const [transactions, setTransactions] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
@@ -73,6 +88,36 @@ export const RecentActivities = ({ limit, isFullPage = false }) => {
     fetchData();
   }, [limit]);
 
+  const handleCategoryChange = async (transactionId, category) => {
+    try {
+      setUpdatingCategory(transactionId);
+
+      const token = localStorage.getItem('token');
+
+      await axios.patch(
+        `${BACKEND_URL}/api/v1/account/transactions/${transactionId}/category`,
+        { category },
+        {
+          headers: {
+            Authorization: 'Bearer ' + token,
+          },
+        },
+      );
+
+      setTransactions((prev) =>
+        prev.map((tx) => (tx._id === transactionId ? { ...tx, category } : tx)),
+      );
+    } catch (err) {
+      console.error('Failed to update category:', err);
+
+      alert(
+        err.response?.data?.message || 'Failed to update transaction category',
+      );
+    } finally {
+      setUpdatingCategory(null);
+    }
+  };
+
   const filteredData = transactions.filter((item) => {
     const nameMatch =
       item.displayUser?.firstName
@@ -81,17 +126,30 @@ export const RecentActivities = ({ limit, isFullPage = false }) => {
       item.displayUser?.lastName
         ?.toLowerCase()
         .includes(searchTerm.toLowerCase());
+
     const typeMatch = typeFilter === 'All' || item.type === typeFilter;
-    return nameMatch && typeMatch;
+
+    const categoryMatch = categoryFilter === 'All' || (item.category || 'General') === categoryFilter;
+
+    return nameMatch && typeMatch && categoryMatch;
   });
 
   const handleExportCSV = () => {
-    const headers = ['ID', 'Name', 'Amount', 'Type', 'Date', 'Status'];
+    const headers = [
+      'ID',
+      'Name',
+      'Amount',
+      'Type',
+      'Category',
+      'Date',
+      'Status',
+    ];
     const rows = filteredData.map((tx) => [
       tx._id,
       `${tx.displayUser?.firstName} ${tx.displayUser?.lastName}`,
       tx.amount,
       tx.type,
+      tx.category || 'General',
       new Date(tx.createdAt).toLocaleDateString(),
       tx.status,
     ]);
@@ -180,6 +238,19 @@ export const RecentActivities = ({ limit, isFullPage = false }) => {
             <option value="income">Received</option>
             <option value="expense">Sent</option>
           </select>
+          <select
+            value={categoryFilter}
+            onChange={(e) => setCategoryFilter(e.target.value)}
+            className="px-4 py-2 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-full text-sm font-medium dark:text-white outline-none focus:ring-2 focus:ring-orange-500/50 transition cursor-pointer"
+          >
+            <option value="All">All Categories</option>
+
+            {TRANSACTION_CATEGORIES.map((category) => (
+              <option key={category} value={category}>
+                {category}
+              </option>
+            ))}
+          </select>
         </div>
       </div>
 
@@ -191,6 +262,7 @@ export const RecentActivities = ({ limit, isFullPage = false }) => {
               <th className="p-4 rounded-l-xl">Status</th>
               <th className="p-4">Person</th>
               <th className="p-4">Amount</th>
+              <th className="p-4">Category</th>
               {isFullPage && <th className="p-4">Date</th>}
               <th className="p-4 rounded-r-xl text-right">Actions</th>
             </tr>
@@ -257,6 +329,31 @@ export const RecentActivities = ({ limit, isFullPage = false }) => {
                       {item.type === 'income' ? '+' : '-'}
                       {formatCurrency(item.amount)}
                     </td>
+                    <td className="p-4">
+                      <select
+                        value={item.category || 'General'}
+                        disabled={updatingCategory === item._id}
+                        onChange={(e) =>
+                          handleCategoryChange(item._id, e.target.value)
+                        }
+                        className="px-3 py-1.5 rounded-lg text-xs font-semibold
+      bg-gray-50 dark:bg-gray-900
+      border border-gray-200 dark:border-gray-800
+      text-gray-700 dark:text-gray-300
+      outline-none
+      focus:ring-2 focus:ring-orange-500/40
+      cursor-pointer
+      disabled:opacity-50
+      disabled:cursor-wait
+      transition"
+                      >
+                        {TRANSACTION_CATEGORIES.map((category) => (
+                          <option key={category} value={category}>
+                            {category}
+                          </option>
+                        ))}
+                      </select>
+                    </td>
                     {isFullPage && (
                       <td className="p-4 text-gray-500 dark:text-gray-400 whitespace-nowrap text-xs">
                         {new Date(item.createdAt).toLocaleDateString('en-US', {
@@ -286,6 +383,7 @@ export const RecentActivities = ({ limit, isFullPage = false }) => {
                         onClick={() => {
                           setSearchTerm('');
                           setTypeFilter('All');
+                          setCategoryFilter('All');
                         }}
                         className="text-orange-500 text-sm font-semibold hover:underline"
                       >

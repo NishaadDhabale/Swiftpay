@@ -18,7 +18,7 @@ router.post('/transfer', authMiddleware, async (req, res) => {
   const session = await mongoose.startSession();
 
   session.startTransaction();
-  const { amount, to } = req.body;
+  const { amount, to,category} = req.body;
 
 
   const accounts = await Account.findOne({ userid: req.userid }).session(
@@ -54,6 +54,7 @@ router.post('/transfer', authMiddleware, async (req, res) => {
     sender: req.userid,
     receiver: to,
     amount: amount,
+    category: category || 'General',
     status: 'completed'
   }], { session });
 
@@ -70,10 +71,15 @@ router.get('/transactions', authMiddleware, async (req, res) => {
   const page = parseInt(req.query.page) || 1;
   const limit = parseInt(req.query.limit) || 20;
   const skip = (page - 1) * limit;
+  const { category } = req.query;
 
   const query = {
     $or: [{ sender: req.userid }, { receiver: req.userid }],
   };
+
+  if (category && category !== 'All') {
+      query.category = category;
+  }
 
   const total = await Transaction.countDocuments(query);
   const transactions = await Transaction.find(query)
@@ -128,3 +134,51 @@ router.get('/analytics', authMiddleware, async (req, res) => {
     daily: Object.values(dailyMap).sort((a, b) => new Date(a.date) - new Date(b.date)),
   });
 });
+
+
+
+router.patch('/transactions/:id/category', authMiddleware, async (req, res) => {
+    const { category } = req.body;
+    const transactionId = req.params.id;
+
+    if (!category) {
+        return res.status(400).json({
+            message: "Category is required"
+        });
+    }
+
+    try {
+        const tx = await Transaction.findOne({
+            _id: transactionId,
+            $or: [
+                { sender: req.userid },
+                { receiver: req.userid }
+            ]
+        });
+
+        if (!tx) {
+            return res.status(404).json({
+                message: "Transaction not found or unauthorized"
+            });
+        }
+
+        tx.category = category;
+
+        await tx.save();
+
+        return res.json({
+            message: "Category updated successfully",
+            transaction: tx
+        });
+
+    } catch (error) {
+        console.error("CATEGORY UPDATE ERROR:", error);
+
+        return res.status(500).json({
+            message: "Error updating category",
+            error: error.message
+        });
+    }
+});
+
+module.exports = router;
